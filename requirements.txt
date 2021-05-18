@@ -1,0 +1,5 @@
+torch
+scikit-learn
+transformers=3.1.0
+nltk
+Yahoo-ticker-downloader
