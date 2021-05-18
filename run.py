@@ -421,7 +421,6 @@ def main():
         len(train_dataset) * args.epoch / (args.per_gpu_batch_size * args.gradient_accumulation_steps * args.n_gpu))
     scheduler = get_linear_schedule_with_warmup(optim, num_warmup_steps=int(total_steps * 0.1),
                                                 num_training_steps=total_steps)
-    # optim = AdamW(model.parameters(), lr=lr)
 
     # training
     logger.info('Start Training')
@@ -485,11 +484,6 @@ def main():
     tokenizer = BertTokenizerFast.from_pretrained(args.model_type)
     tokenizer.save_pretrained(args.output_dir)
     torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
-
-    # Load a trained model and vocabulary that you have fine-tuned
-    # model = model_class.from_pretrained(args.output_dir)
-    # tokenizer = tokenizer_class.from_pretrained(args.output_dir)
-    # model.to(args.device)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,6 @@ from transformers import BertTokenizerFast
 from pathlib import Path
 from copy import deepcopy
 
-TOKENIZERS_PARALLELISM = True
 
 
 class NewsDataset(torch.utils.data.Dataset):

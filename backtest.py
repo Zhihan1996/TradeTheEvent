@@ -567,8 +567,8 @@ def sequential_backtest(results, event_list, evaluation_news, start=10000, each=
 
 if __name__ == "__main__":
     # evaluation_news = load_evaluation_news("/Users/ZZH/Northwestern/Research/er/data/test/evaluate_news_ACL_large/filtered_ticker_time_price_pr_20200301_2021_0430_busi_20200816_20210506_news.json")
-    evaluation_news = load_evaluation_news("data/evaluate_news/filtered_ticker_time_price_fixbestname_pr_20200301_2021_0430_busi_20200816_20210506_news.json")[:]
+    evaluation_news = load_evaluation_news("/home/zhihan/news/examples/news/data/evaluate_news/filtered_ticker_time_price_fixbestname_pr_20200301_2021_0430_busi_20200816_20210506_news.json")[:]
     # all_positive = get_positive_for_event(pred_dir='acl_preds/stack_4', SEQ=False, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
     # all_positive = get_positive_for_bertsst_sentiment("acl_preds/bertsst.npy", threshold=0.99)
-    all_positive = get_positive_for_event_sent_split(pred_dir='acl_preds/seq_256_sent_split_4', seq_threshold=0)
+    all_positive = get_positive_for_event_sent_split(pred_dir='/home/zhihan/news/examples/news/acl_preds/seq_256_sent_split_4', seq_threshold=0)
     results = backtest(all_positive, evaluation_news, save_dir='acl_results/stack_4', buy_pub_same_time=True, stoploss=0.2)
