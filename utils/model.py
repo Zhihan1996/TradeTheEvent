@@ -4,7 +4,7 @@ from torch.nn import CrossEntropyLoss, BCEWithLogitsLoss
 from transformers import BertModel, BertPreTrainedModel
 from transformers import BertConfig
 
-from crf import CRF, to_crf_pad, unpad_crf
+from .crf import CRF, to_crf_pad, unpad_crf
 
 
 class BertCRFForTokenClassification(BertPreTrainedModel):

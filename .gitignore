@@ -1,6 +1,13 @@
+# scripts for experiments
+count_and_print.py
+
+# data and model
+data/cached*
+models/
+
 # backtest results and predictions
 preds/
-results/
+result*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

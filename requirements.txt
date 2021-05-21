@@ -2,4 +2,5 @@ torch
 scikit-learn
 transformers==3.1.0
 nltk
+python-dateutil
 Yahoo-ticker-downloader

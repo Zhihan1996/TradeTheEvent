@@ -13,8 +13,8 @@ from sklearn.metrics import f1_score, precision_recall_fscore_support, classific
 from transformers import BertConfig, BertTokenizerFast, AdamW
 from transformers.optimization import get_linear_schedule_with_warmup
 
-from load_data import load_and_cache_dataset, load_and_cache_predict_dataset, NewsDataset
-from bert_crf import BertCRFForTokenClassification, \
+from utils.data import load_and_cache_dataset, load_and_cache_predict_dataset, NewsDataset
+from utils.model import BertCRFForTokenClassification, \
     BertCRFForJointTokenAndSequenceClassification, \
     BertForSequenceClassification, \
     BertForTokenClassification, \

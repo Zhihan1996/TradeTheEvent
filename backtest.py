@@ -1,7 +1,6 @@
 import os
 import json
 import time
-import pickle
 import numpy as np
 from dateutil import parser
 from datetime import timedelta
@@ -43,43 +42,6 @@ IS_POSITIVE = {
 }
 
 
-def load_trading_dates():
-    with open("data/all_trading_dates.json", "r") as f:
-        trading_dates = json.load(f)
-
-    return trading_dates
-
-
-def load_ticker2comp():
-    with open("data/generic.pickle", "rb") as f:
-        ticker_info = pickle.load(f)
-    ticker2comp = dict()
-    for item in ticker_info.symbols.keys():
-        if ticker_info.symbols[item].exchangeDisplay in ['NASDAQ', 'NYSE']:
-            ticker2comp[ticker_info.symbols[item].ticker] = ticker_info.symbols[item].name
-
-    with open('data/ticker2com.json', 'r') as f:
-        old_ticker2comp = json.load(f)
-    for key in old_ticker2comp.keys():
-        if key not in ticker2comp.keys():
-            ticker2comp[key] = old_ticker2comp[key]
-
-    comp2ticker = {}
-    for item in ticker2comp.items():
-        if item[1] not in comp2ticker.keys():
-            comp2ticker[item[1]] = [item[0]]
-        else:
-            comp2ticker[item[1]].append(item[0])
-
-    for item in list(comp2ticker.keys()):
-        clean_item = item.replace('Inc.', '').replace('Inc', '').replace('Ltd.', '').replace('Ltd', '').replace(',', '') \
-            .replace('.', '').replace(' plc', '').replace('Corporation', '').replace(' Plc', '').replace(' ltd', '') \
-            .replace(' inc', '')
-        clean_item = ' '.join(clean_item.split())
-        if clean_item != item and len(clean_item) >= 5:
-            comp2ticker[clean_item] = comp2ticker[item]
-
-    return ticker2comp, comp2ticker
 
 
 def load_evaluation_news(data_dir):
@@ -184,7 +146,7 @@ def get_positive_for_bertsst_sentiment(BERT_SENTIMENT_PRED_DIR, threshold=0.995)
     return all_positive
 
 
-def get_positive_for_event_sent_split(pred_dir, seq_threshold=0, ignore_event_list=('Clinical Trials', 'Regular Dividend')):
+def get_positive_for_event_sent_split(pred_dir, seq_threshold=0, ignore_event_list=('Regular Dividend',)):
     ignore_list = []
     if len(ignore_event_list) > 0:
         for event in ignore_event_list:
@@ -210,10 +172,11 @@ def get_positive_for_event_sent_split(pred_dir, seq_threshold=0, ignore_event_li
 
         tags = set()
         for pred in current_seq_preds:
-            pos_label = list(np.where(pred > 0)[0])
-            if len(pos_label) > 0 and NOEVENT_ID not in pos_label:
+            pos_label = list(np.where(pred > seq_threshold)[0])
+            if len(pos_label) > 0:
                 for tag in pos_label:
-                    tags.add(tag)
+                    if tag != NOEVENT_ID:
+                        tags.add(tag)
 
         for tag in tags:
             if tag not in ignore_list:
@@ -224,7 +187,7 @@ def get_positive_for_event_sent_split(pred_dir, seq_threshold=0, ignore_event_li
 
 
 def get_positive_for_event(pred_dir, NER=False, SEQ=False, max_seq_len=256, seq_threshold=0,
-                           ignore_event_list=('Clinical Trials', 'Regular Dividend')):
+                           ignore_event_list=('Regular Dividend',)):
     print('Finding trading signals for events with NER={}, SEQ={}, MAX_SEQUENCE_LEN={}, seq_threshold={}'.format(NER, SEQ, max_seq_len, seq_threshold))
     count = 0
 
@@ -310,8 +273,8 @@ def _initialize_dicts_for_data_storage(event_list):
         for policy in ['end', 'best']:
             for period in ['1', '2', '3']:
                 for event in enriched_event_list:
-                    for metric in ['win_count', 'loss_count', 'total_count', 'win_rate', 'win_change_rate',
-                                   'loss_change_rate', 'total_change_rate']:
+                    for metric in ['big_win_count', 'win_count', 'loss_count', 'total_count', 'win_rate', 'win_change_rate',
+                                   'loss_change_rate', 'total_change_rate', 'big_win_rate']:
                         results[start_type][policy][period][event][metric] = 0
                     for index in ['win_index', 'loss_index']:
                         results[start_type][policy][period][event][index] = {}
@@ -320,6 +283,7 @@ def _initialize_dicts_for_data_storage(event_list):
 
 
 def _update_backtest_results_with_change_rate(index, change_rate, result_dict):
+    result_dict['big_win_count'] += (change_rate >= 0.01)
     result_dict['win_count'] += (change_rate >= 0)
     result_dict['loss_count'] += (change_rate < 0)
     result_dict['total_count'] += 1
@@ -334,9 +298,6 @@ def _update_backtest_results_with_change_rate(index, change_rate, result_dict):
 
 
 def backtest(all_positive, evaluation_news, save_dir, buy_pub_same_time=False, stoploss=0.0):
-    ticker2comp, _ = load_ticker2comp()
-    # trading_dates = load_trading_dates()
-
     print("Perform backtesting with buy_pub_same_time={}, stoploss={}".format(buy_pub_same_time, stoploss))
 
     event_list = all_positive.keys()
@@ -457,8 +418,8 @@ def backtest(all_positive, evaluation_news, save_dir, buy_pub_same_time=False, s
         for policy in ['end', 'best']:
             for period in ['1', '2', '3']:
                 for event in event_list:
-                    for metric in ['win_count', 'loss_count', 'total_count', 'win_rate', 'win_change_rate',
-                                   'loss_change_rate', 'total_change_rate']:
+                    for metric in ['big_win_count', 'win_count', 'loss_count', 'total_count', 'win_rate', 'win_change_rate',
+                                   'loss_change_rate', 'total_change_rate', 'big_win_rate']:
                         results[start_type][policy][period]['All'][metric] += results[start_type][policy][period][event][metric]
                     # for index in ['win_index', 'loss_index']:
                     #     results[start_type][policy][period]['All'][index].extend(results[start_type][policy][period][event][index])
@@ -467,6 +428,8 @@ def backtest(all_positive, evaluation_news, save_dir, buy_pub_same_time=False, s
         for policy in ['end', 'best']:
             for period in ['1', '2', '3']:
                 for event in (list(event_list) + ['All']):
+                    results[start_type][policy][period][event]['big_win_rate'] = results[start_type][policy][period][event]['big_win_count'] \
+                                                                             / max(1, results[start_type][policy][period][event]['total_count'])
                     results[start_type][policy][period][event]['win_rate'] = results[start_type][policy][period][event]['win_count'] \
                                                                              / max(1, results[start_type][policy][period][event]['total_count'])
                     results[start_type][policy][period][event]['win_change_rate'] = results[start_type][policy][period][event]['win_change_rate'] \
@@ -477,6 +440,28 @@ def backtest(all_positive, evaluation_news, save_dir, buy_pub_same_time=False, s
                                                                                       / max(1, results[start_type][policy][period][event]['total_count'])
 
 
+
+
+    print(results['open']['end']['1']['All'])
+    print(results['open']['end']['2']['All'])
+    print(results['open']['end']['3']['All'])
+    print(results['open']['best']['1']['All'])
+    print(results['open']['best']['2']['All'])
+    print(results['open']['best']['3']['All'])
+    for event in event_list:
+        print("{}: {} {}".format(event, results['open']['end']['1'][event]['total_change_rate'], results['open']['end']['1'][event]['total_count']))
+
+
+    # calculate earnings and save them in "results"
+    all_earnings = sequential_backtest(results, event_list, evaluation_news)
+
+    for start_type in ['open', 'close']:
+        for policy in ['end']:
+            for period in ['1', '2', '3']:
+                results[start_type][policy][period]['All']['earning'] = all_earnings[start_type][policy][period]
+    
+
+    # save the backtest results
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -487,32 +472,19 @@ def backtest(all_positive, evaluation_news, save_dir, buy_pub_same_time=False, s
     with open(save_dir, "w") as f:
         json.dump(results, f)
 
-
-    print(results['open']['end']['1']['All'])
-    print(results['open']['end']['2']['All'])
-    print(results['open']['end']['3']['All'])
-    print(results['open']['best']['1']['All'])
-    print(results['open']['best']['2']['All'])
-    print(results['open']['best']['3']['All'])
-    # print(results['close']['end']['1']['All'])
-    # print(results['close']['end']['2']['All'])
-    # print(results['close']['end']['3']['All'])
-    # print(results['close']['best']['1']['All'])
-    # print(results['close']['best']['2']['All'])
-    # print(results['close']['best']['3']['All'])
-    for event in event_list:
-        print("{}: {} {}".format(event, results['open']['end']['1'][event]['total_change_rate'], results['open']['end']['1'][event]['total_count']))
-
-    sequential_backtest(results, event_list, evaluation_news)
-
     return results
 
 
 
 def sequential_backtest(results, event_list, evaluation_news, start=10000, each=2000, commission_fee=0.003, market_earning=4404):
+    all_earnings = {}
+
     for start_type in ['open', 'close']:
-        for policy in ['end', 'best']:
+        all_earnings[start_type] = {}
+        for policy in ['end']:
+            all_earnings[start_type][policy] = {}
             for period in ['1', '2', '3']:
+                all_earnings[start_type][policy][period] = 0
                 all_trades = []
                 for event in event_list:
                     positive = IS_POSITIVE[event]
@@ -546,7 +518,7 @@ def sequential_backtest(results, event_list, evaluation_news, start=10000, each=
                                 holdings.remove(stock)
                                 total += stock[0]
 
-                    start_money = each
+                    start_money = each if total > each else 0.2*total
                     end_money = float(start_money)*(1+event[0])*(1-commission_fee)
 
                     if total > start_money:
@@ -561,14 +533,28 @@ def sequential_backtest(results, event_list, evaluation_news, start=10000, each=
                     total += stock[0]
 
                 earning = total-start-market_earning
+                all_earnings[start_type][policy][period] = earning
                 print("Earning of {} {} {} is {}, no money: {}, trade: {}".format(start_type, policy, period, earning, no_money_count, trade_count))
 
+    return all_earnings
 
 
 if __name__ == "__main__":
     # evaluation_news = load_evaluation_news("/Users/ZZH/Northwestern/Research/er/data/test/evaluate_news_ACL_large/filtered_ticker_time_price_pr_20200301_2021_0430_busi_20200816_20210506_news.json")
     evaluation_news = load_evaluation_news("/home/zhihan/news/examples/news/data/evaluate_news/filtered_ticker_time_price_fixbestname_pr_20200301_2021_0430_busi_20200816_20210506_news.json")[:]
-    # all_positive = get_positive_for_event(pred_dir='acl_preds/stack_4', SEQ=False, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
-    # all_positive = get_positive_for_bertsst_sentiment("acl_preds/bertsst.npy", threshold=0.99)
-    all_positive = get_positive_for_event_sent_split(pred_dir='/home/zhihan/news/examples/news/acl_preds/seq_256_sent_split_4', seq_threshold=0)
-    results = backtest(all_positive, evaluation_news, save_dir='acl_results/stack_4', buy_pub_same_time=True, stoploss=0.2)
+    # all_positive = get_positive_for_event(pred_dir='preds/stack_24', SEQ=True, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
+    all_positive = get_positive_for_bertsst_sentiment("preds/bertsst.npy", threshold=0.9)
+    results = backtest(all_positive, evaluation_news, save_dir='results/bertsst_9', buy_pub_same_time=False, stoploss=0.2)
+    all_positive = get_positive_for_bertsst_sentiment("preds/bertsst.npy", threshold=0.995)
+    results = backtest(all_positive, evaluation_news, save_dir='results/bertsst_995', buy_pub_same_time=False, stoploss=0.2)
+    for seed in ['4', '24', '42']:
+        all_positive = get_positive_for_event_sent_split(pred_dir='preds/seq_256_sent_split_' + seed, seq_threshold=-2)
+        results = backtest(all_positive, evaluation_news, save_dir='results/seq_' + seed + "_2", buy_pub_same_time=False, stoploss=0.2)
+
+    for seed in ['4', '24', '42']:
+        all_positive = get_positive_for_event(pred_dir='preds/crf_' + seed, SEQ=False, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
+        results = backtest(all_positive, evaluation_news, save_dir='results/crf_' + seed, buy_pub_same_time=False, stoploss=0.2)
+    
+    for seed in ['4', '24', '42']:
+        all_positive = get_positive_for_event(pred_dir='preds/stack_' + seed, SEQ=True, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
+        results = backtest(all_positive, evaluation_news, save_dir='results/stack_' + seed, buy_pub_same_time=False, stoploss=0.2)
