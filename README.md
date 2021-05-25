@@ -109,7 +109,7 @@ export PRED_DIR=preds/bilevel
 export DATA_DIR=DIR_TO_EDT_DATASET/Trading_benchmark/evaluate_news.json
 export RESULTS_DIR=results/
 
-python backtest.py \
+python run_backtest.py \
 		--evaluate_news_dir DATA_DIR \
 		--pred_dir PRED_DIR \
 		--save_dir RESULTS_DIR \
