@@ -1,3 +1,5 @@
+.idea*
+
 # scripts for experiments
 count_and_print.py
 

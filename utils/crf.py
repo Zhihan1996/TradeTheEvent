@@ -37,7 +37,6 @@ def log_sum_exp(vec, m_size):
 
 
 class CRF(nn.Module):
-
     def __init__(self, tagset_size):  # average_batch=False,
         super(CRF, self).__init__()
         print("Building CRF...")

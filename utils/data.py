@@ -47,7 +47,7 @@ def read_wnut(file_path):
 
     return token_docs, tag_docs
 
-
+# general token-level labels
 def encode_tags(tags, encodings, tag2id):
     labels = [[tag2id[tag] for tag in doc] for doc in tags]
     encoded_labels = []

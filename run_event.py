@@ -15,11 +15,9 @@ from transformers.optimization import get_linear_schedule_with_warmup
 
 from utils.data import load_and_cache_dataset, load_and_cache_predict_dataset, NewsDataset
 from utils.model import BertCRFForTokenClassification, \
-    BertCRFForJointTokenAndSequenceClassification, \
     BertForSequenceClassification, \
     BertForTokenClassification, \
-    BertForJointTokenAndSequenceClassification, \
-    BertForStackedTokenAndSequenceClassification
+    BertForBilevelClassification
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -39,14 +37,16 @@ def set_seed(seed=24):
 
 
 def get_tag_correct(pred, label, args):
+    noevent_id = args.noevent_id
+
     tags = set(list(pred))
-    if 11 in tags:
-        tags.remove(11)
+    if noevent_id in tags:
+        tags.remove(noevent_id)
 
     true_tags = set(label)
     if not args.do_predict:
-        if 11 in true_tags:
-            true_tags.remove(11)
+        if noevent_id in true_tags:
+            true_tags.remove(noevent_id)
         if -100 in true_tags:
             true_tags.remove(-100)
 
@@ -72,12 +72,12 @@ def evaluate(test_dataset, model, args):
     seq_correct = 0
     ner_correct = 0
     ner_total = 0
-    if args.TASK == 'stack':
-        all_seq_preds = torch.zeros([1, 11])
+    if args.TASK == 'bilevel':
+        all_seq_preds = torch.zeros([1, args.num_labels-1])
     elif args.CRF:
-        all_seq_preds = torch.zeros([1, 14])
+        all_seq_preds = torch.zeros([1, args.num_labels+2])
     else:
-        all_seq_preds = torch.zeros([1, 12])
+        all_seq_preds = torch.zeros([1, args.num_labels])
     all_ner_preds = torch.zeros([0])
     all_ner_labels = torch.zeros([0])
 
@@ -118,13 +118,11 @@ def evaluate(test_dataset, model, args):
                 else:
                     ner_pred = outputs[0].argmax(dim=2)
 
-                    # assert len(torch.where(ner_pred==-100)[0]) == 0
-                # print(torch.where(ner_pred==-100)[0])
 
                 ner_values = outputs[0]
                 ner_values = softmax(ner_values)
                 ner_values = ner_values.max(dim=2)[0]
-                ner_pred[ner_values < args.threshold] = 11
+                ner_pred[ner_values < args.threshold] = args.noevent_id
 
                 ner_labels = ner_labels.view_as(ner_pred)
                 ner_correct += ner_pred.eq(ner_labels)[ner_labels != -100].sum().item()
@@ -144,12 +142,12 @@ def evaluate(test_dataset, model, args):
                 all_ner_labels = torch.cat([all_ner_labels, ner_labels.type_as(all_ner_labels)])
 
 
-            elif args.TASK in ['both', 'stack']:
+            elif args.TASK in ['bilevel']:
                 outputs = model(input_ids, attention_mask=attention_mask)
 
                 # for seq
                 seq_labels = batch['seq_labels'].to(args.device)[:, :-1] if \
-                            (args.TASK == 'stack' and not args.do_predict) else batch['seq_labels'].to(args.device)
+                            (args.TASK == 'bilevel' and not args.do_predict) else batch['seq_labels'].to(args.device)
 
                 # if args.CRF:
                 #     seq_labels = torch.cat([seq_labels, torch.zeros([len(seq_labels), 2]).type_as(seq_labels).to(args.device)], dim=1)
@@ -176,7 +174,7 @@ def evaluate(test_dataset, model, args):
                 ner_values = outputs[0]
                 ner_values = softmax(ner_values)
                 ner_values = ner_values.max(dim=2)[0]
-                ner_pred[ner_values < args.threshold] = 11
+                ner_pred[ner_values < args.threshold] = args.noevent_id
 
                 ner_labels = ner_labels.view_as(ner_pred)
                 ner_correct += ner_pred.eq(ner_labels)[ner_labels != -100].sum().item()
@@ -204,7 +202,7 @@ def evaluate(test_dataset, model, args):
         np.save(os.path.join(source_path, 'seq_pred.npy'), all_seq_preds)
     elif args.TASK == 'ner':
         np.save(os.path.join(source_path, 'ner_pred.npy'), all_ner_preds)
-    elif args.TASK in ['both', 'stack']:
+    elif args.TASK in ['bilevel']:
         np.save(os.path.join(source_path, 'ner_pred.npy'), all_ner_preds)
         np.save(os.path.join(source_path, 'seq_pred.npy'), all_seq_preds)
 
@@ -212,7 +210,7 @@ def evaluate(test_dataset, model, args):
         logger.info('\n')
         if args.TASK == 'seq':
             logger.info('Seq Accuracy: {}'.format(100. * seq_correct / len(test_dataloader.dataset)))
-        elif args.TASK in ['ner', 'both', 'stack']:
+        elif args.TASK in ['ner', 'bilevel']:
             ner_report = classification_report(all_ner_labels[all_ner_labels != -100].numpy(),
                                             all_ner_preds[all_ner_labels != -100].numpy())
             logger.info(ner_report)
@@ -236,7 +234,7 @@ def evaluate(test_dataset, model, args):
             # tag accuracy
             logger.info('Tag Accuracy: {}'.format(100. * tag_correct / len(test_dataloader.dataset)))
 
-            if args.TASK in ['both', 'stack']:
+            if args.TASK in ['bilevel']:
                 logger.info('Seq Accuracy: {}'.format(100. * seq_correct / len(test_dataloader.dataset)))
 
             if args.CRF:
@@ -263,7 +261,8 @@ def predict(args):
 
     MODEL_CLASS = get_model_class(args)
     config = BertConfig.from_pretrained(model_path)
-    config.num_labels = 12
+    config.num_labels = args.num_labels
+    config.max_seq_length = args.max_seq_length
     model = MODEL_CLASS.from_pretrained(model_path, config=config)
     model.to(args.device)
     if args.n_gpu > 1:
@@ -280,13 +279,8 @@ def get_model_class(args):
             return BertCRFForTokenClassification
         else:
             return BertForTokenClassification
-    elif args.TASK == 'both':
-        if args.CRF:
-            return BertCRFForJointTokenAndSequenceClassification
-        else:
-            return BertForJointTokenAndSequenceClassification
-    elif args.TASK == 'stack':
-        return BertForStackedTokenAndSequenceClassification
+    elif args.TASK == 'bilevel':
+        return BertForBilevelClassification
     else:
         raise ValueError()
 
@@ -298,11 +292,11 @@ def main():
         "--data_dir",
         default='data/ner',
         type=str,
-        help="The input data dir. Should contain the files for the task.",
+        help="The input data dir. Should contain the event detection data",
     )
     parser.add_argument(
         "--model_type",
-        default='bert-large-cased-whole-word-masking',
+        default='bert-base-cased',
         type=str,
         help="Model type",
     )
@@ -317,7 +311,8 @@ def main():
         default=None,
         type=str,
         required=True,
-        help="choose from ['seq', 'ner', 'both']",
+        help="choose from ['seq', 'ner', 'bilevel'], 'seq' stands for sequence classification, 'ner' stands for token classification"
+             "'bilevel' stands for the proposed bilevel detection model",
     )
     parser.add_argument(
         "--output_dir",
@@ -348,7 +343,13 @@ def main():
         "--threshold", default=0, type=float, help="The threshold for NER."
     )
     parser.add_argument(
-        "--epoch", default=3, type=int, help="Number of epoch for training"
+        "--epoch", default=5, type=int, help="Number of epoch for training"
+    )
+    parser.add_argument(
+        "--num_labels", default=12, type=int, help="Number of unique labels in the dataset"
+    )
+    parser.add_argument(
+        "--noevent_id", default=11, type=int, help="The id of the NOEVENT label in the dataset"
     )
     parser.add_argument(
         "--per_gpu_batch_size", default=2, type=int, help="Batch size"
@@ -455,7 +456,7 @@ def main():
             elif args.TASK == 'ner':
                 labels = batch['ner_labels'].to(args.device)
                 outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
-            elif args.TASK in ['both', 'stack']:
+            elif args.TASK in ['bilevel']:
                 seq_labels = batch['seq_labels'].to(args.device)
                 ner_labels = batch['ner_labels'].to(args.device)
                 if args.CRF:

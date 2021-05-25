@@ -1,11 +1,10 @@
 import os
 import json
-import time
 import numpy as np
 from dateutil import parser
-from datetime import timedelta
 from copy import deepcopy
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import argparse
 
 index2event = {
     '0': 'Acquisitions',
@@ -538,23 +537,63 @@ def sequential_backtest(results, event_list, evaluation_news, start=10000, each=
 
     return all_earnings
 
+def main():
+    # config
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--evaluate_news_dir", default='data/Trading_benchmark/evaluate_news.json', type=str, help="Direction to the downloaded evaluation news."
+    )
+    parser.add_argument(
+        "--bert_sst_pred_dir", default='preds/bertsst.npy', type=str, help="Only used for 'bertsst', the direction of the bertsst prediction scores"
+                                                                           "on the evaluation news"
+    )
+    parser.add_argument(
+        "--pred_dir", default='preds/', type=str, help="The dir to event detection models' predictions"
+    )
+    parser.add_argument(
+        "--save_dir", default='results/', type=str, help="The dir to save the backtest results"
+    )
+    parser.add_argument(
+        "--model_type", default='bilevel', type=str,
+        help="Choose from ['vader', 'bertsst', 'keyword', 'ner', 'bilevel']. 'vader' stands for vader-based sentiment model,"
+             "'bertsst' stands for BERT-SST based sentiment model, 'keyword' stands for keyword-matching based event model"
+             "'ner' stands for the BERT-CRF based event model, 'bilevel' stands for the proposed bilevel detection model"
+    )
+    parser.add_argument(
+        "--sentiment_threshold", default=0.9, type=float,
+        help="All the news articles that have a sentiment score over this threshold is regard as a positive trading signal"
+    )
+    parser.add_argument(
+        "--seq_threshold", default=5, type=float,
+        help="All the events that have a existing probability over this threshold is regard as a positive trading signal. Only used for 'bilevel'"
+    )
+    parser.add_argument(
+        "--stoploss", default=0.2, type=float,
+        help="The stoploss rate. If no stoploss, set this to 0"
+    )
+    parser.add_argument(
+        "--buy_pub_same_time", action="store_true", help="Whether only trade on the news whose start_time equals to pub_time"
+    )
+
+    args = parser.parse_args()
+
+    evaluation_news = load_evaluation_news(args.evaluate_news_dir)
+    if args.model_type == 'vader':
+        all_positive = get_positive_for_vader_sentiment(evaluation_news=evaluation_news, threshold=args.sentiment_threshold)
+    elif args.model_type == 'bertsst':
+        all_positive = get_positive_for_bertsst_sentiment(BERT_SENTIMENT_PRED_DIR=args.bert_sent_pred_dir)
+    elif args.model_type == 'keyword':
+        all_positive = get_positive_for_keyword(evaluation_news=evaluation_news)
+    elif args.model_type == 'ner':
+        all_positive = get_positive_for_event(pred_dir=args.pred_dir, SEQ=False, NER=True)
+    elif args.model_type == 'bilevel':
+        all_positive = get_positive_for_event(pred_dir=args.pred_dir, SEQ=True, NER=True, seq_threshold=args.seq_threshold)
+    else:
+        raise ValueError()
+
+    _ = backtest(all_positive, evaluation_news, save_dir=args.save_dir, buy_pub_same_time=args.buy_pub_same_time, stoploss=args.stoploss)
+
+
 
 if __name__ == "__main__":
-    # evaluation_news = load_evaluation_news("/Users/ZZH/Northwestern/Research/er/data/test/evaluate_news_ACL_large/filtered_ticker_time_price_pr_20200301_2021_0430_busi_20200816_20210506_news.json")
-    evaluation_news = load_evaluation_news("/home/zhihan/news/examples/news/data/evaluate_news/filtered_ticker_time_price_fixbestname_pr_20200301_2021_0430_busi_20200816_20210506_news.json")[:]
-    # all_positive = get_positive_for_event(pred_dir='preds/stack_24', SEQ=True, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
-    all_positive = get_positive_for_bertsst_sentiment("preds/bertsst.npy", threshold=0.9)
-    results = backtest(all_positive, evaluation_news, save_dir='results/bertsst_9', buy_pub_same_time=False, stoploss=0.2)
-    all_positive = get_positive_for_bertsst_sentiment("preds/bertsst.npy", threshold=0.995)
-    results = backtest(all_positive, evaluation_news, save_dir='results/bertsst_995', buy_pub_same_time=False, stoploss=0.2)
-    for seed in ['4', '24', '42']:
-        all_positive = get_positive_for_event_sent_split(pred_dir='preds/seq_256_sent_split_' + seed, seq_threshold=-2)
-        results = backtest(all_positive, evaluation_news, save_dir='results/seq_' + seed + "_2", buy_pub_same_time=False, stoploss=0.2)
-
-    for seed in ['4', '24', '42']:
-        all_positive = get_positive_for_event(pred_dir='preds/crf_' + seed, SEQ=False, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
-        results = backtest(all_positive, evaluation_news, save_dir='results/crf_' + seed, buy_pub_same_time=False, stoploss=0.2)
-    
-    for seed in ['4', '24', '42']:
-        all_positive = get_positive_for_event(pred_dir='preds/stack_' + seed, SEQ=True, NER=True, seq_threshold=5, ignore_event_list=('Regular Dividend',))
-        results = backtest(all_positive, evaluation_news, save_dir='results/stack_' + seed, buy_pub_same_time=False, stoploss=0.2)
+    main()

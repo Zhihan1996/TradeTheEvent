@@ -1,6 +1,6 @@
 # EDT dataset
 
-The EDT dataset is designed for corporate event detection and text-based stock prediction (trading strategy) benchmark. It includes $9721$ news articles with token-level event labels and $303893$ news articles with minute-level timestamps and comprehensive stock price labels. 
+The EDT dataset is designed for corporate event detection and text-based stock prediction (trading strategy) benchmark. It includes `9721​` news articles with token-level event labels and `303893​` news articles with minute-level timestamps and comprehensive stock price labels. 
 
 
 
@@ -30,7 +30,7 @@ A special category "O" stands for no event.
 
 #### 2. Trading Benchmark
 
-The benchmark dataset contains  $303893$ news articles range from `2020/03/01` to `2021/05/06`. The articles are downloaded from the [PRNewswire](https://www.prnewswire.com/) and [Businesswire](https://www.businesswire.com/).
+The benchmark dataset contains `303893​` news articles range from `2020/03/01` to `2021/05/06`. The articles are downloaded from the [PRNewswire](https://www.prnewswire.com/) and [Businesswire](https://www.businesswire.com/).
 
 
 

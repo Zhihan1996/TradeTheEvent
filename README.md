@@ -16,7 +16,7 @@ We release the EDT dataset for corporate event detection and news-based stock pr
 
 ## Environment
 
-We recommand to first build a virtual Python environment with Python >= 3.6. Then the requirements can be installed with:
+We recommand to use a Python virtual environment with Python >= 3.6. Then the requirements can be installed with:
 
 ```
 git clone https://github.com/Zhihan1996/TradeTheEvent
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 
 
-## Get Started
+## Run and Backtest Our Model
 
 ### 1. Domain Adaptation
 
@@ -56,7 +56,9 @@ python run_domain_adapt.py \
 
 
 
-### 2. Model Training
+
+
+### 2. Train the Model for Event Detection
 
 ```
 export ADA_MODEL_DIR=models/bert_bc_adapted
@@ -64,7 +66,7 @@ export DATA_DIR=DIR_TO_EDT_DATASET/Event_detection
 export OUTPUT_DIR=models/bilevel
 
 python run_event.py \
-    --TASK stack \
+    --TASK bilevel \
     --data_dir DATA_DIR \
     --epoch 5 \
     --model_type ADA_MODEL_DIR \
@@ -77,17 +79,47 @@ python run_event.py \
 
 
 
-
-
-### 3. Backtest
+### 3. Detect Events on the Evaluation News
 
 ```
-python backtest.py 
+export OUTPUT_DIR=models/bilevel
+export PRED_DIR=preds/bilevel
+export DATA_DIR=DIR_TO_EDT_DATASET/Trading_benchmark/evaluate_news.json
+
+
+python run_event.py \
+    --TASK bilevel \
+    --output_dir OUTPUT_DIR \
+    --per_gpu_batch_size 64 \
+    --predict_dir PRED_DIR \
+    --do_predict \
+    --max_seq_length 256 \
+    --data_dir DATA_DIR
+
 ```
 
 
 
 
+
+### 4. Backtest
+
+```
+export PRED_DIR=preds/bilevel
+export DATA_DIR=DIR_TO_EDT_DATASET/Trading_benchmark/evaluate_news.json
+export RESULTS_DIR=results/
+
+python backtest.py \
+		--evaluate_news_dir DATA_DIR \
+		--pred_dir PRED_DIR \
+		--save_dir RESULTS_DIR \
+		--model_type bilevel \
+		--seq_threshold 5 \
+		--stoploss 0.2 \
+		--buy_pub_same_time
+```
+
+The final backtest results will appear at the `RESULTS_DIR`.
 
 
 
