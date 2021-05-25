@@ -47,6 +47,7 @@ def read_wnut(file_path):
 
     return token_docs, tag_docs
 
+
 # general token-level labels
 def encode_tags(tags, encodings, tag2id):
     labels = [[tag2id[tag] for tag in doc] for doc in tags]
@@ -91,7 +92,7 @@ def load_seq_data_from_json(path, MAX_LEN):
     return texts, labels
 
 
-def load_and_cache_dataset(DATA_PATH, BERT_MODEL='bert-base-uncased', MAX_LEN=256):
+def load_and_cache_dataset(DATA_PATH, BERT_MODEL='bert-base-uncased', MAX_LEN=256, num_labels=12):
     # tokenization
     tokenizer = BertTokenizerFast.from_pretrained(BERT_MODEL)
 
@@ -113,8 +114,7 @@ def load_and_cache_dataset(DATA_PATH, BERT_MODEL='bert-base-uncased', MAX_LEN=25
 
     for train_tag in train_ner_tags:
         tag_set = set(train_tag)
-        current_label = np.zeros([12])
-        # current_label = -np.ones([12])
+        current_label = np.zeros([num_labels])
         if len(tag_set) == 1:
             current_label[tag2id['O']] = 1
         else:
@@ -125,8 +125,7 @@ def load_and_cache_dataset(DATA_PATH, BERT_MODEL='bert-base-uncased', MAX_LEN=25
 
     for test_tag in test_ner_tags:
         tag_set = set(test_tag)
-        current_label = np.zeros([12])
-        # current_label = -np.ones([12])
+        current_label = np.zeros([num_labels])
         if len(tag_set) == 1:
             current_label[tag2id['O']] = 1
         else:

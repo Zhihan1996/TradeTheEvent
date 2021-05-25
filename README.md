@@ -16,7 +16,7 @@ We release the EDT dataset for corporate event detection and news-based stock pr
 
 ## Environment
 
-We recommand to use a Python virtual environment with Python >= 3.6. Then the requirements can be installed with:
+We recommand to use a Python virtual environment with Python >= 3.6. The requirements can be installed with:
 
 ```
 git clone https://github.com/Zhihan1996/TradeTheEvent
