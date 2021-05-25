@@ -3,6 +3,7 @@ count_and_print.py
 
 # data and model
 data/cached*
+data/vader*
 models/
 
 # backtest results and predictions
