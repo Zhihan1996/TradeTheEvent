@@ -4,7 +4,7 @@ This repository is the official implementation of the following paper:
 
 Zhihan Zhou, Liqian Ma, Han Liu. "Trade the Event: Corporate Events Detection for News-Based Event-Driven Trading." In Findings of ACL 2021.
 
-Please see our paper for more details.
+Please see [our paper](https://arxiv.org/pdf/2105.12825v1.pdf) for more details.
 
 
 
@@ -110,13 +110,13 @@ export DATA_DIR=DIR_TO_EDT_DATASET/Trading_benchmark/evaluate_news.json
 export RESULTS_DIR=results/
 
 python run_backtest.py \
-		--evaluate_news_dir DATA_DIR \
-		--pred_dir PRED_DIR \
-		--save_dir RESULTS_DIR \
-		--model_type bilevel \
-		--seq_threshold 5 \
-		--stoploss 0.2 \
-		--buy_pub_same_time
+    --evaluate_news_dir DATA_DIR \
+    --pred_dir PRED_DIR \
+    --save_dir RESULTS_DIR \
+    --model_type bilevel \
+    --seq_threshold 5 \
+    --stoploss 0.2 \
+    --buy_pub_same_time
 ```
 
 The final backtest results will appear at the `RESULTS_DIR`.
