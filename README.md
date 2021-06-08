@@ -4,7 +4,7 @@ This repository is the official implementation of the following paper:
 
 Zhihan Zhou, Liqian Ma, Han Liu. "Trade the Event: Corporate Events Detection for News-Based Event-Driven Trading." In Findings of ACL 2021.
 
-Please see [our paper](https://arxiv.org/pdf/2105.12825v1.pdf) for more details.
+Please see [our paper](https://arxiv.org/pdf/2105.12825.pdf) for more details.
 
 
 
