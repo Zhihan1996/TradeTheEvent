@@ -73,6 +73,34 @@ Each article is saved as a dictionary with the following keys:
 
 
 
+<font color=red>**IMPORTANT: Ticker of each article is automatically assigned. So there are errors. Please be aware of this if you are using the 'labels' for model evaluation.**</font>
+
+As described in the paper, for news articles that describe a specific company (e.g., [this](https://www.globenewswire.com/news-release/2019/06/03/1863089/0/en/Avenue-Therapeutics-Announces-Positive-Topline-Data-from-Second-Pivotal-Phase-3-Study-of-Intravenous-Tramadol-in-the-Management-of-Postoperative-Pain.html) and [this](https://www.prnewswire.com/news-releases/flowers-foods-increases-quarterly-dividend-301063646.html)), the ticker recognizer achieves an accuracy of 98% in recoginizing the ticker. However, recently, we realize that some articles that are not related to any company are assigned with random tickers due to the greedy nature of the ticker recognizer. 
+
+You may either label the ticker and price changes by yourself or stick with our original labels to directly compare with our paper. A naive way to filter out (almost) all the mistakenly labeled item is:
+
+```python
+import json
+
+with open('PATH_TO_DATA', 'r') as f:
+  original_data = json.load(f)
+ 
+filtered_data = []
+for item in origianal_data:
+  # only take the articles that are assigned with a ticker
+  if len(item['labels']) > 10:
+    # if the ticker of keywords like 'NYSE' and 'NASDAQ' exist in the article
+    # then the label is very likely to be correct
+    if 'nyse' in item['text'].lower() or 'nasdaq' in item['text'].lower() or item['labels']['ticker'] in item['text']:
+      filtered_data.append(item)
+```
+
+
+
+
+
+
+
 
 
 #### 3. Domain Adaptation
