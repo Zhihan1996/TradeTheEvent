@@ -4,7 +4,7 @@ This repository is the official implementation of the following paper:
 
 Zhihan Zhou, Liqian Ma, Han Liu. "Trade the Event: Corporate Events Detection for News-Based Event-Driven Trading." In Findings of ACL 2021.
 
-Please see [our paper](https://arxiv.org/pdf/2105.12825.pdf) for more details.
+Please see [our paper](https://aclanthology.org/2021.findings-acl.186.pdf) for more details.
 
 
 
@@ -131,3 +131,19 @@ The final backtest results will appear at the `RESULTS_DIR`.
 
 If you use the codes or dataset in your work, please kindly cite our paper.
 
+```
+@inproceedings{zhou-etal-2021-trade,
+    title = "Trade the Event: Corporate Events Detection for News-Based Event-Driven Trading",
+    author = "Zhou, Zhihan  and
+      Ma, Liqian  and
+      Liu, Han",
+    booktitle = "Findings of the Association for Computational Linguistics: ACL-IJCNLP 2021",
+    month = aug,
+    year = "2021",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.findings-acl.186",
+    doi = "10.18653/v1/2021.findings-acl.186",
+    pages = "2114--2124",
+}
+```
