@@ -32,6 +32,7 @@ if __name__ == "__main__":
     if args.download_all:
         with open("data/all_tickers.json", "r") as f:
             ticker_list = json.load(f)
+        ticker_list.sort()
     else:
         ticker_list = []
         ticker_list.append(args.ticker)
@@ -77,7 +78,7 @@ if __name__ == "__main__":
 
             if len(current_url) == old_length:
                 fail_count += 1
-                if fail_count >= 3:
+                if fail_count >= 2:
                     break
 
             old_length = len(current_url)
@@ -86,10 +87,11 @@ if __name__ == "__main__":
 
         print("Find {} links for {}, inserting to the database".format(len(current_url), ticker))
 
-        data = []
-        for url in current_url:
-            item = {'url':url}
-            data.append(item)
-        collection_news.insert_many(data)
+        if len(current_url) > 0:
+            data = []
+            for url in current_url:
+                item = {'url':url}
+                data.append(item)
+            collection_news.insert_many(data)
 
     d.close()
