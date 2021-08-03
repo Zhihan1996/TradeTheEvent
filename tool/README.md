@@ -77,5 +77,5 @@ python Download_links.py --ticker AAPL
 
 #### 3.2 Download news articles from the links
 ```
-python Download_news.py --download_all
+python Download_news.py
 ```
