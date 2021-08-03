@@ -7,7 +7,7 @@ This repository contains
 Zhihan Zhou, Liqian Ma, Han Liu. [Trade the Event: Corporate Events Detection for News-Based Event-Driven Trading](https://aclanthology.org/2021.findings-acl.186.pdf). In Findings of ACL 2021.
 
 2. The EDT dataset for corporate event detection and news-based stock prediction benchmark.
-3. Tools for scraping news articles from [Reuters](https://www.reuters.com/) and interactively analyze any online news articles (Including event detection and sentiment analysis).
+3. Tools for scraping all the news articles from [Reuters](https://www.reuters.com/) back to 2017 and interactively analyze any online news articles (Including event detection and sentiment analysis).
 
 
 

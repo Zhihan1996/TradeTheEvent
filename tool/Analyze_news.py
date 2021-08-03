@@ -13,7 +13,7 @@ from run_backtest import _get_positive_for_event_single
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 
-MODEL_DIR = '../models/stack_24'
+MODEL_DIR = '../models/model_seed24'
 MAX_LEN = 256
 Event2color = {
     'Acquisitions': ["31m", "41m"],
