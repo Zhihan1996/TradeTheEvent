@@ -1,19 +1,34 @@
 # TradeTheEvent
 
-This repository is the official implementation of the following paper:
+This repository contains
 
-Zhihan Zhou, Liqian Ma, Han Liu. "Trade the Event: Corporate Events Detection for News-Based Event-Driven Trading." In Findings of ACL 2021.
+1. Official implementation of the following paper:
 
-Please see [our paper](https://aclanthology.org/2021.findings-acl.186.pdf) for more details.
+Zhihan Zhou, Liqian Ma, Han Liu. [Trade the Event: Corporate Events Detection for News-Based Event-Driven Trading](https://aclanthology.org/2021.findings-acl.186.pdf). In Findings of ACL 2021.
+
+2. The EDT dataset for corporate event detection and news-based stock prediction benchmark.
+3. Tools for scraping news articles from [Reuters](https://www.reuters.com/) and interactively analyze any online news articles (Including event detection and sentiment analysis).
 
 
 
-## Data
+## Dataset
+
 We release the EDT dataset for corporate event detection and news-based stock prediction benchmark. Please refer to the `data/` folder for access and detailed information about this dataset. The dataset can be found [here](https://drive.google.com/drive/folders/1xKjd9hzA8UTn2DXVIYYnX5TngNAMom19?usp=sharing).
 
 
 
-## Environment
+## Tool
+
+We shall the tool for scraping news article and interactively analyze news articles on how it may influence the stock market. Please refer to the `tool/` folder for access and detailed information about our tool.
+
+
+
+
+
+## Official Implementation
+
+### 0. Environment
+
 We recommand to use a Python virtual environment with Python >= 3.6. The requirements can be installed with:
 
 ```
@@ -24,7 +39,7 @@ pip install -r requirements.txt
 
 
 
-## Run and Backtest Our Model
+
 
 ### 1. Domain Adaptation
 
@@ -127,7 +142,7 @@ The final backtest results will appear at the `RESULTS_DIR`.
 
 ## Reference
 
-If you use the codes or dataset in your work, please kindly cite our paper.
+If you use the codes, tool, or the dataset, please kindly cite our paper.
 
 ```
 @inproceedings{zhou-etal-2021-trade,
