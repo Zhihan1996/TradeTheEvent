@@ -1,0 +1,6 @@
+newspaper3k
+beautifulsoup4
+selenium
+webdriver-manager
+pymongo
+termcolor

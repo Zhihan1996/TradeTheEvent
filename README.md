@@ -9,13 +9,11 @@ Please see [our paper](https://aclanthology.org/2021.findings-acl.186.pdf) for m
 
 
 ## Data
-
 We release the EDT dataset for corporate event detection and news-based stock prediction benchmark. Please refer to the `data/` folder for access and detailed information about this dataset. The dataset can be found [here](https://drive.google.com/drive/folders/1xKjd9hzA8UTn2DXVIYYnX5TngNAMom19?usp=sharing).
 
 
 
 ## Environment
-
 We recommand to use a Python virtual environment with Python >= 3.6. The requirements can be installed with:
 
 ```

@@ -246,6 +246,23 @@ def get_positive_for_event(pred_dir, NER=False, SEQ=False, max_seq_len=256, seq_
     return all_positive
 
 
+def _get_positive_for_event_single(pred):
+    pred[pred == -100] = NOEVENT_ID
+    tags = set(pred)
+    # seq_tags = set(list(np.where(seq_preds[index] > seq_threshold)[0]))
+    # tags = tags.union(seq_tags)
+
+    results = {}
+
+    if len(tags) > 1:
+        tags.remove(NOEVENT_ID)
+        for tag in list(tags):
+            results[index2event[str(tag)]] = np.where(pred==tag)[0]
+    
+    return results
+
+
+
 def _initialize_dicts_for_data_storage(event_list):
     results = {}
     enriched_event_list = list(event_list) + ['All']
