@@ -57,7 +57,7 @@ Type `python Analyze_news.py` in command line to open the interactive tools. Thi
 
 Press `Control + C` to end the tool.
 
-
+![Tool_example](data/Tool_example.jpeg)
 
 
 ### 3. Scrape Reuters
