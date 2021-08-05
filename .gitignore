@@ -1,6 +1,7 @@
 .idea*
 
 */.DS_Store
+.DS_Store
 
 # scripts for experiments
 count_and_print.py

@@ -85,6 +85,9 @@ while True:
             logger.info("Please type the link to the news article")
             url = input("Link: ")
 
+            if len(url) < 5:
+                continue
+
             logger.info("Downloading and parsing article")
             article = download_article(url)
 
