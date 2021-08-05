@@ -42,7 +42,7 @@ mongod --dbpath /var/lib/mongo --logpath /var/log/mongodb/mongod.log --fork
 
 #### 1.3 Download Trained Event Detection Model and NLTK Sentiment Model
 
-Please download the model [here](https://drive.google.com/file/d/1v5Gk9zAADZ-f-3nTpt0YZBeD4juQGHLB/view?usp=sharing) and copy the zip file it into `TradeTheEvent/models`.
+Please download the model [here](https://drive.google.com/file/d/1PmiVjVsJe5_K28e7s2bweGujZp5kUOo0/view?usp=sharing) and copy the zip file it into `TradeTheEvent/models`.
 
 ```
 cd ../models
