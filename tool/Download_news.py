@@ -19,7 +19,7 @@ for i, item in enumerate(url_to_download):
     if i > 0 and i % 20 == 0:
         print("Successfully downloading {} news".format(i))
 
-    title, text, pub_time = download_article_seperate(url)
+    title, text, pub_time = download_article_seperate(item['url'])
     item['title'] = title
     item['text'] = text
     item['pub_time'] = pub_time

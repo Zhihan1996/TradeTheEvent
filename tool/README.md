@@ -14,6 +14,7 @@ We provide tools that:
 #### 1.1 Python Environment
 
 ```
+python3 -m pip install -r requirements.txt
 cd tool
 python3 -m pip install -r requirements.txt
 ```
