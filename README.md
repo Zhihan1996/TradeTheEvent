@@ -11,6 +11,10 @@ Zhihan Zhou, Liqian Ma, Han Liu. [Trade the Event: Corporate Events Detection fo
 
 
 
+If you use any of them in your work, please [cite](## Reference) our paper.
+
+
+
 ## Dataset
 
 We release the EDT dataset for corporate event detection and news-based stock prediction benchmark. Please refer to the `data/` folder for access and detailed information about this dataset. The dataset can be found [here](https://drive.google.com/drive/folders/1xKjd9hzA8UTn2DXVIYYnX5TngNAMom19?usp=sharing).
@@ -23,11 +27,7 @@ We shall the tool for scraping news article and interactively analyze news artic
 
 
 
-
-
-## Official Implementation
-
-### 0. Environment
+## Environment
 
 We recommand to use a Python virtual environment with Python >= 3.6. The requirements can be installed with:
 
@@ -40,6 +40,10 @@ pip install -r requirements.txt
 
 
 
+
+
+
+## Official Implementation
 
 ### 1. Domain Adaptation
 
