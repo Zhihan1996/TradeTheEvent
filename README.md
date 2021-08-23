@@ -11,7 +11,7 @@ Zhihan Zhou, Liqian Ma, Han Liu. [Trade the Event: Corporate Events Detection fo
 
 
 
-If you use any of them in your work, please [cite](## Reference) our paper.
+If you use any of them in your work, please [cite](#reference) our paper.
 
 
 
