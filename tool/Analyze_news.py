@@ -142,34 +142,6 @@ while True:
 
             logger.info(text.replace("[CLS] ", "").replace("[SEP]", "") + "......")
             print("\n\n\n")
-            #     all_event = {}
-            #     for event in results:
-            #         evidence = results[event]
-            #         all_text = []
-            #         cur_text = ""
-            #         last_e = -1
-            #         for e in evidence:
-            #             if e - last_e > 2:
-            #                 cur_text = cur_text.replace(" ##", "").strip('[CLS]').strip()
-            #                 if len(cur_text) > 1:
-            #                     all_text.append(cur_text)
-            #                 cur_text = ""
-            #             last_e = e
-            #             cur_text += tokenizer._convert_id_to_token(model_input[e]) + " "
-                    
-            #         if len(cur_text) > 1:
-            #             all_text.append(cur_text.replace(" ##", "").strip('[CLS]').strip())
-
-            #         all_event[event] = all_text
-            
-            # print("{} corporate events are detected".format(len(all_event)))
-            # for i, event in enumerate(all_event):
-            #     print("\tEvent {} : {}".format(i+1, event))
-            #     for j, text in enumerate(all_event[event]):
-            #         print("\t\t Evidence {} : {}".format(j+1, text))
-            # print("\n\n\n")
-
-            
 
 
     except KeyboardInterrupt:
