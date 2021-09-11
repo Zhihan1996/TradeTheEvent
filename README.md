@@ -45,6 +45,18 @@ pip install -r requirements.txt
 
 ## Official Implementation
 
+### 0. Download Data
+
+Please download data from [here](https://drive.google.com/drive/folders/1xKjd9hzA8UTn2DXVIYYnX5TngNAMom19?usp=sharing) and put all the three data folder into a folder. Suppose the data dir is `/home/user/data`, set the environment variable as:
+
+```
+export DIR_TO_EDT_DATASET=/home/user/data
+```
+
+
+
+
+
 ### 1. Domain Adaptation
 
 ```
